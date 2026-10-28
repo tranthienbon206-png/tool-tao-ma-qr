@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Công cụ tạo mã QR</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        #qrResult canvas,
+        #qrResult img {
+            display: block;
+            max-width: 100%;
+            height: auto;
+            margin: auto;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen bg-slate-50 text-slate-800">
+
+    <header class="border-b border-slate-200 bg-white">
+        <div class="mx-auto flex max-w-5xl items-center gap-3 px-5 py-5">
+            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-600 text-xl font-bold text-white">
+                QR
+            </div>
+            <div>
+                <h1 class="text-xl font-bold text-slate-900">Công cụ tạo mã QR</h1>
+                <p class="text-sm text-slate-500">Tạo mã QR nhanh chóng và miễn phí</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="mx-auto max-w-5xl px-5 py-10">
+
+        <section class="mb-8">
+            <p class="mb-2 text-sm font-semibold uppercase tracking-wider text-blue-600">
+                Công cụ trực tuyến
+            </p>
+            <h2 class="text-3xl font-bold tracking-tight text-slate-900">
+                Tạo mã QR của riêng bạn
+            </h2>
+            <p class="mt-3 text-sm leading-6 text-slate-600">
+                Nhập đường link hoặc văn bản, tùy chỉnh mã QR và tải ảnh về máy.
+            </p>
+        </section>
+
+        <section class="grid gap-6 md:grid-cols-5">
+
+            <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm md:col-span-3 sm:p-7">
+
+                <label for="qrText" class="mb-3 block text-sm font-semibold">
+                    Nội dung cần tạo mã QR
+                </label>
+
+                <textarea id="qrText" rows="5" maxlength="2000"
+                    placeholder="Ví dụ: https://example.com hoặc nhập nội dung văn bản..."
+                    class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm leading-6 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"></textarea>
+
+                <div class="mt-2 flex justify-between text-xs text-slate-500">
+                    <span>Nhập đường link hoặc văn bản</span>
+                    <span id="charCount">0/2000</span>
+                </div>
+
+                <div class="mt-5">
+                    <label for="qrSize" class="mb-2 block text-sm font-semibold">
+                        Kích thước mã QR
+                    </label>
+                    <select id="qrSize"
+                        class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none focus:border-blue-500">
+                        <option value="160">160 × 160 px</option>
+                        <option value="220" selected>220 × 220 px</option>
+                        <option value="300">300 × 300 px</option>
+                        <option value="400">400 × 400 px</option>
+                    </select>
+                </div>
+
+                <div class="mt-5 grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="darkColor" class="mb-2 block text-sm font-semibold">
+                            Màu mã QR
+                        </label>
+                        <input id="darkColor" type="color" value="#111827"
+                            class="h-11 w-full cursor-pointer rounded-lg border border-slate-300 bg-white p-1">
+                    </div>
+
+                    <div>
+                        <label for="lightColor" class="mb-2 block text-sm font-semibold">
+                            Màu nền
+                        </label>
+                        <input id="lightColor" type="color" value="#ffffff"
+                            class="h-11 w-full cursor-pointer rounded-lg border border-slate-300 bg-white p-1">
+                    </div>
+                </div>
+
+                <button id="generateBtn" type="button"
+                    class="mt-6 w-full rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white transition hover:bg-blue-700">
+                    Tạo mã QR
+                </button>
+
+                <button id="resetBtn" type="button"
+                    class="mt-3 w-full rounded-xl border border-slate-300 px-5 py-3 font-semibold text-slate-700 transition hover:bg-slate-50">
+                    Xóa nội dung
+                </button>
+
+                <p id="status" role="status" class="mt-4 text-sm"></p>
+            </div>
+
+            <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm md:col-span-2 sm:p-7">
+                <h3 class="text-lg font-bold text-slate-900">Mã QR của bạn</h3>
+                <p class="mt-2 text-sm leading-6 text-slate-500">
+                    Kết quả sẽ hiển thị sau khi bạn tạo mã.
+                </p>
+
+                <div
+                    class="mt-5 flex min-h-64 items-center justify-center rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4">
+                    <div id="emptyState" class="text-center">
+                        <div
+                            class="mx-auto flex h-16 w-16 items-center justify-center rounded-xl bg-blue-50 text-3xl text-blue-600">
+                        </div>
+                        <p class="mt-3 text-sm text-slate-500">Chưa có mã QR</p>
+                    </div>
+
+                    <div id="qrResult" class="hidden max-w-full bg-white p-2"></div>
+                </div>
+
+                <button id="downloadBtn" type="button" disabled
+                    class="mt-5 w-full rounded-xl bg-emerald-600 px-5 py-3 font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-slate-300">
+                    Tải mã QR xuống
+                </button>
+
+                <p class="mt-3 text-center text-xs text-slate-500">
+                    Định dạng hình ảnh PNG
+                </p>
+            </div>
+
+        </section>
+
+        <section class="mt-6 grid gap-4 sm:grid-cols-3">
+            <div class="rounded-xl border border-slate-200 bg-white p-5">
+                <h3 class="font-semibold text-slate-900">Dễ sử dụng</h3>
+                <p class="mt-2 text-sm leading-5 text-slate-500">
+                    Tạo mã QR chỉ với một lần nhấn.
+                </p>
+            </div>
+
+            <div class="rounded-xl border border-slate-200 bg-white p-5">
+                <h3 class="font-semibold text-slate-900">Tùy chỉnh</h3>
+                <p class="mt-2 text-sm leading-5 text-slate-500">
+                    Thay đổi kích thước và màu sắc mã QR.
+                </p>
+            </div>
+
+            <div class="rounded-xl border border-slate-200 bg-white p-5">
+                <h3 class="font-semibold text-slate-900">Tải miễn phí</h3>
+                <p class="mt-2 text-sm leading-5 text-slate-500">
+                    Tải mã QR về máy để chia sẻ hoặc in.
+                </p>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="mt-10 border-t border-slate-200 bg-white">
+        <div class="mx-auto max-w-5xl px-5 py-5 text-center text-xs text-slate-500">
+            Công cụ tạo mã QR · Đơn giản, nhanh chóng và miễn phí
+        </div>
+    </footer>
+
+    <script>
+        const qrText = document.getElementById("qrText");
+        const qrSize = document.getElementById("qrSize");
+        const darkColor = document.getElementById("darkColor");
+        const lightColor = document.getElementById("lightColor");
+        const qrResult = document.getElementById("qrResult");
+        const emptyState = document.getElementById("emptyState");
+        const downloadBtn = document.getElementById("downloadBtn");
+        const status = document.getElementById("status");
+        const charCount = document.getElementById("charCount");
+
+        function showStatus(message, color = "text-slate-600") {
+            status.textContent = message;
+            status.className = "mt-4 text-sm " + color;
+        }
+
+        function generateQR() {
+            const text = qrText.value.trim();
+
+            if (!text) {
+                showStatus("Vui lòng nhập nội dung trước khi tạo mã QR.", "text-red-600");
+                qrText.focus();
+                return;
+            }
+
+            if (typeof QRCode === "undefined") {
+                showStatus(
+                    "Không tải được thư viện QR. Hãy kiểm tra kết nối mạng rồi tải lại trang.",
+                    "text-red-600"
+                );
+                return;
+            }
+
+            qrResult.innerHTML = "";
+            qrResult.classList.remove("hidden");
+            emptyState.classList.add("hidden");
+
+            const size = Number(qrSize.value);
+
+            try {
+                new QRCode(qrResult, {
+                    text: text,
+                    width: size,
+                    height: size,
+                    colorDark: darkColor.value,
+                    colorLight: lightColor.value,
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+
+                downloadBtn.disabled = false;
+                showStatus("Tạo mã QR thành công!", "text-green-700");
+            } catch (error) {
+                qrResult.innerHTML = "";
+                qrResult.classList.add("hidden");
+                emptyState.classList.remove("hidden");
+                downloadBtn.disabled = true;
+                showStatus("Không thể tạo mã QR. Vui lòng thử nội dung khác.", "text-red-600");
+            }
+        }
+
+        function downloadQR() {
+            const canvas = qrResult.querySelector("canvas");
+            const image = qrResult.querySelector("img");
+            let imageURL = "";
+
+            if (canvas) {
+                imageURL = canvas.toDataURL("image/png");
+            } else if (image && image.src) {
+                imageURL = image.src;
+            }
+
+            if (!imageURL) {
+                showStatus("Vui lòng tạo mã QR trước khi tải xuống.", "text-red-600");
+                return;
+            }
+
+            const link = document.createElement("a");
+            link.href = imageURL;
+            link.download = "ma-qr.png";
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+
+            showStatus("Đã tải mã QR xuống.", "text-green-700");
+        }
+
+        function resetTool() {
+            qrText.value = "";
+            qrResult.innerHTML = "";
+            qrResult.classList.add("hidden");
+            emptyState.classList.remove("hidden");
+            downloadBtn.disabled = true;
+            charCount.textContent = "0/2000";
+
+            showStatus("Đã xóa nội dung.", "text-slate-500");
+            qrText.focus();
+        }
+
+        qrText.addEventListener("input", () => {
+            charCount.textContent = qrText.value.length + "/2000";
+        });
+
+        document.getElementById("generateBtn").addEventListener("click", generateQR);
+        document.getElementById("downloadBtn").addEventListener("click", downloadQR);
+        document.getElementById("resetBtn").addEventListener("click", resetTool);
+
+        qrSize.addEventListener("change", () => {
+            if (qrText.value.trim()) generateQR();
+        });
+
+        darkColor.addEventListener("input", () => {
+            if (qrText.value.trim()) generateQR();
+        });
+
+        lightColor.addEventListener("input", () => {
+            if (qrText.value.trim()) generateQR();
+        });
+    </script>
+
+</body>
+
+</html>
